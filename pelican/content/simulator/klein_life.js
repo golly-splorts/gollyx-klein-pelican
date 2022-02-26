@@ -35,8 +35,13 @@
 
 
     // Initial Conditions:
-    s1Default: '[{"50":[60,160]},{"51":[62,162]},{"52":[59,60,63,64,65,159,160,163,164,165]}]',
-    s2Default: '[{"60":[60,160]},{"61":[62,162]},{"62":[59,60,63,64,65,159,160,163,164,165]}]',
+    //
+    // // Two acorns
+    // s1Default: '[{"50":[60,160]},{"51":[62,162]},{"52":[59,60,63,64,65,159,160,163,164,165]}]',
+    // s2Default: '[{"60":[60,160]},{"61":[62,162]},{"62":[59,60,63,64,65,159,160,163,164,165]}]',
+    // Crabs
+    s1Default: '[{"43":[119,160]},{"44":[118,120,160,161]},{"45":[119,159,161]},{"46":[122,123]},{"47":[119,122,123,157,158]},{"48":[118,120,125,157,158]},{"49":[120,126,127]},{"50":[118,119,125,126,155,159,160,167]},{"51":[115,118,154,156,158,161,167,168]},{"52":[155,159,161,162,166,168]},{"53":[117,164]},{"54":[115,116,165]},{"55":[118,162,165]},{"56":[119,120]},{"57":[118,119]}]',
+    s2Default: '[{"40":[85]},{"41":[85,86]},{"42":[84,86]},{"44":[82,83]},{"45":[82,83]},{"47":[80,84,85,92]},{"48":[79,81,83,86,92,93]},{"49":[37,80,84,86,87,91,93]},{"50":[36,38,89]},{"51":[37,90]},{"52":[33,34,87,90]},{"53":[33,34,37]},{"54":[31,36,38]},{"55":[29,30,36]},{"56":[30,31,37,38]},{"57":[38,41]},{"59":[39]},{"60":[40,41]},{"61":[38]},{"62":[36,37]},{"63":[37,38]}]',
 
     // Geometry:
     defaultCols: 200,
@@ -1731,28 +1736,89 @@
 
         // iterate over each point stored in the actualState list
         // this is the SURVIVE step
+        var y, ym1, yp1;
         for (i = 0; i < this.actualState.length; i++) {
 
-          var x, y, xm1, ym1, xp1, yp1;
+          y = this.actualState[i][0];
+          yp1 = this.periodicNormalizey(y+1);
+          ym1 = this.periodicNormalizey(y-1);
+
+          var x, xm1, xp1;
+          var kx, kxm1, kxp1;
           for (j = 1; j < this.actualState[i].length; j++) {
+
             x = this.actualState[i][j];
-            y = this.actualState[i][0];
-
             xm1 = this.periodicNormalizex(x-1);
-            ym1 = this.periodicNormalizey(y-1);
-
             xp1 = this.periodicNormalizex(x+1);
-            yp1 = this.periodicNormalizey(y+1);
 
-            x = this.periodicNormalizex(x);
-            y = this.periodicNormalizey(y);
+            if (y == 0) {
 
-            // Possible dead neighbors
-            deadNeighbors = [[xm1, ym1, 1], [x, ym1, 1], [xp1, ym1, 1], [xm1, y, 1], [xp1, y, 1], [xm1, yp1, 1], [x, yp1, 1], [xp1, yp1, 1]];
+              kxm1 = this.kleinInverse(xm1);
+              kx = this.kleinInverse(x);
+              kxp1 = this.kleinInverse(xp1);
+
+              //kxm1 = this.periodicNormalizex(this.kleinInverse(xm1));
+              //kx = this.periodicNormalizex(this.kleinInverse(x));
+              //kxp1 = this.periodicNormalizex(this.kleinInverse(xp1));
+
+              //kxm1 = xm1;
+              //kx = x;
+              //kxp1 = xp1;
+
+              // deadNeighbors ym1 row will need klein-flipped x's
+              deadNeighbors = [
+                [kxm1, ym1, 1], [kx, ym1, 1], [kxp1, ym1, 1], 
+                [xm1, y, 1], [xp1, y, 1], 
+                [xm1, yp1, 1], [x, yp1, 1], [xp1, yp1, 1]
+              ];
+
+            } else if (y == GOL.rows-1) {
+
+              kxm1 = this.kleinInverse(xm1);
+              kx = this.kleinInverse(x);
+              kxp1 = this.kleinInverse(xp1);
+
+              //kxm1 = this.periodicNormalizex(this.kleinInverse(xm1));
+              //kx = this.periodicNormalizex(this.kleinInverse(x));
+              //kxp1 = this.periodicNormalizex(this.kleinInverse(xp1));
+
+              //kxm1 = xm1;
+              //kx = x;
+              //kxp1 = xp1;
+
+              // deadNeighbors yp1 row will need klein-flipped x's
+              deadNeighbors = [
+                [xm1, ym1, 1], [x, ym1, 1], [xp1, ym1, 1], 
+                [xm1, y, 1], [xp1, y, 1], 
+                [kxm1, yp1, 1], [kx, yp1, 1], [kxp1, yp1, 1]
+              ];
+
+            } else {
+
+              // Possible dead neighbors
+              deadNeighbors = [
+                [xm1, ym1, 1], [x, ym1, 1], [xp1, ym1, 1], 
+                [xm1, y, 1], [xp1, y, 1], 
+                [xm1, yp1, 1], [x, yp1, 1], [xp1, yp1, 1]
+              ];
+
+            }
+
+            if ((x==187) && (y==99)) {
+              console.log('187,99 dead neighbors before:');
+              console.log(deadNeighbors);
+            }
 
             // Get number of live neighbors and remove alive neighbors from deadNeighbors
             result = this.getNeighborsFromAlive(x, y, i, this.actualState, deadNeighbors);
             neighbors = result['neighbors'];
+
+            if ((x==187) && (y==99)) {
+              console.log('187,99 dead neighbors after:');
+              console.log(deadNeighbors);
+              console.log('187,99 neighbors:');
+              console.log(neighbors);
+            }
 
             ////////////////////////
             // Tie, keep current color
@@ -1785,8 +1851,6 @@
 
             ///////////////////////////////
             // SURVIVE counts
-            //
-            // klein... whatever
 
             var cellSurvives = false;
             var k;
@@ -1795,9 +1859,13 @@
                 cellSurvives = true;
               }
             }
+
+            if (y == GOL.rows-1) {
+              console.log('survive for cell x = ' + x + ' y = ' + y + ' : ' + cellSurvives);
+            }
+
             if (cellSurvives) {
               // Keep cell alive
-
               this.addCell(x, y, newState);
               if (color==1) {
                 this.addCell(x, y, newState1);
@@ -1850,6 +1918,8 @@
               this.addCell(t1, t2, newState2);
             }
 
+            console.log('birthing cell ' + t1 + ', ' + t2 + ' (color = ' + color + ')');
+
             this.redrawList.push([t1, t2, 1]);
           }
         }
@@ -1859,6 +1929,14 @@
         this.actualState2 = newState2;
 
         return this.getLiveCounts();
+      },
+
+
+      /**
+       * Given an x coordinate, find the Klein inverse
+       */
+      kleinInverse(j) {
+        return (GOL.columns - j - 1);
       },
 
 
@@ -2089,6 +2167,16 @@
         var ym1 = ((y-1) + GOL.rows)%(GOL.rows);
         var yp1 = ((y+1) + GOL.rows)%(GOL.rows);
 
+        if (y==0) {
+          kxm1 = this.kleinInverse(xm1);
+          kx = this.kleinInverse(x);
+          kxp1 = this.kleinInverse(xp1);
+        } else if (y==GOL.rows-1) {
+          kxm1 = this.kleinInverse(xm1);
+          kx = this.kleinInverse(x);
+          kxp1 = this.kleinInverse(xp1);
+        }
+
         var xstencilmin = Math.min(xm1, x, xp1);
         var xstencilmax = Math.max(xm1, x, xp1);
 
@@ -2105,12 +2193,24 @@
         }
         if (state[im1] !== undefined) {
           if (state[im1][0] === ym1) {
+
+            var xm1_;
+            if (y==0) {
+              xm1_ = kxm1;
+              x_ = kx;
+              xp1_ = kxp1;
+            } else {
+              xm1_ = xm1;
+              x_ = x;
+              xp1_ = xp1;
+            }
+
             for (k = 1; k < state[im1].length; k++) {
 
               //if (state[i-1][k] >= xstencilmin ) {
 
                 // NW
-                if (state[im1][k] === xm1) {
+                if (state[im1][k] === xm1_) {
                   possibleNeighborsList[0] = undefined;
                   //this.topPointer = k + 1;
                   neighbors++;
@@ -2125,7 +2225,7 @@
                 }
 
                 // N
-                if (state[im1][k] === x) {
+                if (state[im1][k] === x_) {
                   possibleNeighborsList[1] = undefined;
                   //this.topPointer = k;
                   neighbors++;
@@ -2140,7 +2240,7 @@
                 }
 
                 // NE
-                if (state[im1][k] === xp1) {
+                if (state[im1][k] === xp1_) {
                   possibleNeighborsList[2] = undefined;
 
                   neighbors++;
@@ -2205,10 +2305,22 @@
         }
         if (state[ip1] !== undefined) {
           if (state[ip1][0] === yp1) {
+
+            var xm1_;
+            if (y==GOL.rows-1) {
+              xm1_ = kxm1;
+              x_ = kx;
+              xp1_ = kxp1;
+            } else {
+              xm1_ = xm1;
+              x_ = x;
+              xp1_ = xp1;
+            }
+
             for (k = 1; k < state[ip1].length; k++) {
               //if (state[i+1][k] >= xstencilmin) {
 
-                if (state[ip1][k] === xm1) {
+                if (state[ip1][k] === xm1_) {
                   possibleNeighborsList[5] = undefined;
                   neighbors++;
                   var xx = state[ip1][k];
@@ -2221,7 +2333,7 @@
                   }
                 }
 
-                if (state[ip1][k] === x) {
+                if (state[ip1][k] === x_) {
                   possibleNeighborsList[6] = undefined;
                   neighbors++;
                   var xx = state[ip1][k];
@@ -2234,7 +2346,7 @@
                   }
                 }
 
-                if (state[ip1][k] === xp1) {
+                if (state[ip1][k] === xp1_) {
                   possibleNeighborsList[7] = undefined;
 
                   neighbors++;
@@ -2263,6 +2375,8 @@
         } else if (neighbors2 > neighbors1) {
           color = 2;
         } else {
+          // return 0 if tie, keep color. fix in callee
+          // color = 0;
           if (x%2==y%2) {
             color = 1;
           } else {
@@ -2337,6 +2451,7 @@
        *
        */
       removeCell : function(x, y, state) {
+        console.log('removing cell x = ' + x + ' y = ' + y);
 
         // Periodic grid
         var x = this.periodicNormalizex(x);
