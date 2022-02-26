@@ -1804,29 +1804,16 @@
 
             }
 
-            if ((x==187) && (y==99)) {
-              console.log('187,99 dead neighbors before:');
-              console.log(deadNeighbors);
-            }
-
             // Get number of live neighbors and remove alive neighbors from deadNeighbors
             result = this.getNeighborsFromAlive(x, y, i, this.actualState, deadNeighbors);
             neighbors = result['neighbors'];
 
-            if ((x==187) && (y==99)) {
-              console.log('187,99 dead neighbors after:');
-              console.log(deadNeighbors);
-              console.log('187,99 neighbors:');
-              console.log(neighbors);
-            }
-
-            ////////////////////////
-            // Tie, keep current color
-            color = this.getCellColor(x, y);
-
             // Majority wins, use color returned by getNeighborsFromAlive
             color = result['color'];
-            ////////////////////////
+            if (color <= 0) {
+              // Tie, keep current color
+              color = this.getCellColor(x, y);
+            }
 
             // Iterate over each dead cell (in the vicinity of alive cells),
             // and check how many times this dead cell shows up as a live cell neighbor.
@@ -1981,174 +1968,175 @@
         var ym1 = ((y-1) + GOL.rows)%(GOL.rows);
         var yp1 = ((y+1) + GOL.rows)%(GOL.rows);
 
-        // Periodic boundary conditions complicate any checks that end the loops early.
-        var xstencilmin = Math.min(xm1, x, xp1);
-        var xstencilmax = Math.max(xm1, x, xp1);
-
-        var ystencilmin = Math.min(ym1, y, yp1);
-        var ystencilmax = Math.max(ym1, y, yp1);
+        if (y==0) {
+          kxm1 = this.kleinInverse(xm1);
+          kx = this.kleinInverse(x);
+          kxp1 = this.kleinInverse(xp1);
+        } else if (y==GOL.rows-1) {
+          kxm1 = this.kleinInverse(xm1);
+          kx = this.kleinInverse(x);
+          kxp1 = this.kleinInverse(xp1);
+        }
 
         // color1
         for (i = 0; i < state1.length; i++) {
           var yy = state1[i][0];
 
-          //if (yy >= ystencilmin) {
+          if (yy === ym1) {
 
-            if (yy === ym1) {
-              // Top row
-              for (j = 1; j < state1[i].length; j++) {
-                var xx = state1[i][j];
+            var xm1_, x_, xp1_;
+            if (y==0) {
+              xm1_ = kxm1;
+              x_ = kx;
+              xp1_ = kxp1;
+            } else {
+              xm1_ = xm1;
+              x_ = x;
+              xp1_ = xp1;
+            }
 
-                // Slight difference with periodic algorithm,
-                // checking minimum of x values in the stencil
-                //if (xx >= xstencilmin) {
+            // Top row
+            for (j = 1; j < state1[i].length; j++) {
+              var xx = state1[i][j];
 
-                  if (xx === xm1) {
-                    // top left
-                    color1++;
-                  } else if (xx === x) {
-                    // top middle
-                    color1++;
-                  } else if (xx === xp1) {
-                    // top right
-                    color1++;
-                  }
-                //}
-                //if (xx >= xstencilmax) {
-                //  break;
-                //}
-              }
-
-            } else if (yy === y) {
-              // Middle row
-              for (j = 1; j < state1[i].length; j++) {
-                var xx = state1[i][j];
-                //if (xx >= xstencilmin) {
-                  if (xx === xm1) {
-                    // top left
-                    color1++;
-                  } else if (xx === xp1) {
-                    // top right
-                    color1++;
-                  }
-                //}
-                //if (xx >= xstencilmax) {
-                //  break;
-                //}
-              }
-
-            } else if (yy === yp1) {
-              // Bottom row
-              for (j = 1; j < state1[i].length; j++) {
-                var xx = state1[i][j];
-                //if (xx >= xstencilmin) {
-                  if (xx === xm1) {
-                    // bottom left
-                    color1++;
-                  } else if (xx === x) {
-                    // bottom middle
-                    color1++;
-                  } else if (xx === xp1) {
-                    // bottom right
-                    color1++;
-                  }
-                //}
-                //if (xx >= xstencilmax) {
-                //  break;
-                //}
+              if (xx === xm1_) {
+                // top left
+                color1++;
+              } else if (xx === x_) {
+                // top middle
+                color1++;
+              } else if (xx === xp1_) {
+                // top right
+                color1++;
               }
             }
 
-          //}
-          //if (yy >= ystencilmax) {
-          //  break;
-          //}
+          } else if (yy === y) {
+            // Middle row
+            for (j = 1; j < state1[i].length; j++) {
+              var xx = state1[i][j];
+              if (xx === xm1) {
+                // top left
+                color1++;
+              } else if (xx === xp1) {
+                // top right
+                color1++;
+              }
+            }
+
+          } else if (yy === yp1) {
+
+            var xm1_, x_, xp1_;
+            if (y==GOL.rows-1) {
+              xm1_ = kxm1;
+              x_ = kx;
+              xp1_ = kxp1;
+            } else {
+              xm1_ = xm1;
+              x_ = x;
+              xp1_ = xp1;
+            }
+
+            // Bottom row
+            for (j = 1; j < state1[i].length; j++) {
+              var xx = state1[i][j];
+              if (xx === xm1_) {
+                // bottom left
+                color1++;
+              } else if (xx === x_) {
+                // bottom middle
+                color1++;
+              } else if (xx === xp1_) {
+                // bottom right
+                color1++;
+              }
+            }
+          }
+
         }
 
         // color2
         for (i = 0; i < state2.length; i++) {
           var yy = state2[i][0];
 
-          //if (yy >= ystencilmin) {
+          if (yy === ym1) {
 
-            if (yy === ym1) {
-              // Top row
-              for (j = 1; j < state2[i].length; j++) {
-                var xx = state2[i][j];
-                //if (xx >= xstencilmin) {
-                  if (xx === xm1) {
-                    // top left
-                    color2++;
-                  } else if (xx === x) {
-                    // top middle
-                    color2++;
-                  } else if (xx === xp1) {
-                    // top right
-                    color2++;
-                  }
-                //}
-                //if (xx >= xstencilmax) {
-                //  break;
-                //}
-              }
+            var xm1_, x_, xp1_;
+            if (y==0) {
+              xm1_ = kxm1;
+              x_ = kx;
+              xp1_ = kxp1;
+            } else {
+              xm1_ = xm1;
+              x_ = x;
+              xp1_ = xp1;
+            }
 
-            } else if (yy === y) {
-              // Middle row
-              for (j = 1; j < state2[i].length; j++) {
-                var xx = state2[i][j];
-                //if (xx >= xstencilmin) {
-                  if (xx === xm1) {
-                    // left
-                    color2++;
-                  } else if (xx === xp1) {
-                    // right
-                    color2++;
-                  }
-                //}
-                //if (xx >= xstencilmax) {
-                //  break;
-                //}
-              }
-
-            } else if (yy === yp1) {
-              // Bottom row
-              for (j = 1; j < state2[i].length; j++) {
-                var xx = state2[i][j];
-                //if (xx >= xstencilmin) {
-                  if (xx === xm1) {
-                    // bottom left
-                    color2++;
-                  } else if (xx === x) {
-                    // bottom middle
-                    color2++;
-                  } else if (xx === xp1) {
-                    // bottom right
-                    color2++;
-                  }
-                //}
-                //if (xx >= xstencilmax) {
-                //  break;
-                //}
+            // Top row
+            for (j = 1; j < state2[i].length; j++) {
+              var xx = state2[i][j];
+              if (xx === xm1) {
+                // top left
+                color2++;
+              } else if (xx === x) {
+                // top middle
+                color2++;
+              } else if (xx === xp1) {
+                // top right
+                color2++;
               }
             }
 
-          //}
-          //if (yy >= ystencilmax) {
-          //  break;
-          //}
+          } else if (yy === y) {
+            // Middle row
+            for (j = 1; j < state2[i].length; j++) {
+              var xx = state2[i][j];
+              if (xx === xm1) {
+                // left
+                color2++;
+              } else if (xx === xp1) {
+                // right
+                color2++;
+              }
+            }
+
+          } else if (yy === yp1) {
+
+            var xm1_, x_, xp1_;
+            if (y==GOL.rows-1) {
+              xm1_ = kxm1;
+              x_ = kx;
+              xp1_ = kxp1;
+            } else {
+              xm1_ = xm1;
+              x_ = x;
+              xp1_ = xp1;
+            }
+
+            // Bottom row
+            for (j = 1; j < state2[i].length; j++) {
+              var xx = state2[i][j];
+              if (xx === xm1_) {
+                // bottom left
+                color2++;
+              } else if (xx === x_) {
+                // bottom middle
+                color2++;
+              } else if (xx === xp1_) {
+                // bottom right
+                color2++;
+              }
+            }
+          }
+
         }
 
-        // TODO: fix so we don't use parity
         if (color1 > color2) {
           return 1;
         } else if (color2 > color1) {
           return 2;
         } else {
-          if (x%2==y%2) {
-            return 1;
-          } else {
-            return 2;
-          }
+          return 0;
         }
       },
 
@@ -2177,12 +2165,6 @@
           kxp1 = this.kleinInverse(xp1);
         }
 
-        var xstencilmin = Math.min(xm1, x, xp1);
-        var xstencilmax = Math.max(xm1, x, xp1);
-
-        var ystencilmin = Math.min(ym1, y, yp1);
-        var ystencilmax = Math.max(ym1, y, yp1);
-
         var neighbors = 0, k;
         var neighbors1 = 0, neighbors2 = 0;
 
@@ -2194,7 +2176,7 @@
         if (state[im1] !== undefined) {
           if (state[im1][0] === ym1) {
 
-            var xm1_;
+            var xm1_, x_, xp1_;
             if (y==0) {
               xm1_ = kxm1;
               x_ = kx;
@@ -2207,95 +2189,84 @@
 
             for (k = 1; k < state[im1].length; k++) {
 
-              //if (state[i-1][k] >= xstencilmin ) {
-
-                // NW
-                if (state[im1][k] === xm1_) {
-                  possibleNeighborsList[0] = undefined;
-                  //this.topPointer = k + 1;
-                  neighbors++;
-                  var xx = state[im1][k];
-                  var yy = state[im1][0];
-                  var cellcol = this.getCellColor(xx, yy);
-                  if (cellcol === 1) {
-                    neighbors1++;
-                  } else if (cellcol === 2) {
-                    neighbors2++;
-                  }
+              // NW
+              if (state[im1][k] === xm1_) {
+                possibleNeighborsList[0] = undefined;
+                //this.topPointer = k + 1;
+                neighbors++;
+                var xx = state[im1][k];
+                var yy = state[im1][0];
+                var cellcol = this.getCellColor(xx, yy);
+                if (cellcol === 1) {
+                  neighbors1++;
+                } else if (cellcol === 2) {
+                  neighbors2++;
                 }
+              }
 
-                // N
-                if (state[im1][k] === x_) {
-                  possibleNeighborsList[1] = undefined;
-                  //this.topPointer = k;
-                  neighbors++;
-                  var xx = state[im1][k];
-                  var yy = state[im1][0];
-                  var cellcol = this.getCellColor(xx, yy);
-                  if (cellcol === 1) {
-                    neighbors1++;
-                  } else if (cellcol === 2) {
-                    neighbors2++;
-                  }
+              // N
+              if (state[im1][k] === x_) {
+                possibleNeighborsList[1] = undefined;
+                //this.topPointer = k;
+                neighbors++;
+                var xx = state[im1][k];
+                var yy = state[im1][0];
+                var cellcol = this.getCellColor(xx, yy);
+                if (cellcol === 1) {
+                  neighbors1++;
+                } else if (cellcol === 2) {
+                  neighbors2++;
                 }
+              }
 
-                // NE
-                if (state[im1][k] === xp1_) {
-                  possibleNeighborsList[2] = undefined;
+              // NE
+              if (state[im1][k] === xp1_) {
+                possibleNeighborsList[2] = undefined;
 
-                  neighbors++;
-                  var xx = state[im1][k];
-                  var yy = state[im1][0];
-                  var cellcol = this.getCellColor(xx, yy);
-                  if (cellcol == 1) {
-                    neighbors1++;
-                  } else if (cellcol == 2) {
-                    neighbors2++;
-                  }
+                neighbors++;
+                var xx = state[im1][k];
+                var yy = state[im1][0];
+                var cellcol = this.getCellColor(xx, yy);
+                if (cellcol == 1) {
+                  neighbors1++;
+                } else if (cellcol == 2) {
+                  neighbors2++;
                 }
-
-                //if (state[i-1][k] > xstencilmax) {
-                //  break;
-                //}
-              //}
+              }
             }
+
           }
         }
 
         // Middle
         for (k = 1; k < state[i].length; k++) {
-          //if (state[i][k] >= xstencilmin) {
 
-            if (state[i][k] === xm1) {
-              possibleNeighborsList[3] = undefined;
-              neighbors++;
-              var xx = state[i][k];
-              var yy = state[i][0];
-              var cellcol = this.getCellColor(xx, yy);
-              if (cellcol == 1) {
-                neighbors1++;
-              } else if (cellcol == 2) {
-                neighbors2++;
-              }
+          if (state[i][k] === xm1) {
+            possibleNeighborsList[3] = undefined;
+            neighbors++;
+            var xx = state[i][k];
+            var yy = state[i][0];
+            var cellcol = this.getCellColor(xx, yy);
+            if (cellcol == 1) {
+              neighbors1++;
+            } else if (cellcol == 2) {
+              neighbors2++;
             }
+          }
 
-            if (state[i][k] === xp1) {
-              possibleNeighborsList[4] = undefined;
-              neighbors++;
-              var xx = state[i][k];
-              var yy = state[i][0];
-              var cellcol = this.getCellColor(xx, yy);
-              if (cellcol == 1) {
-                neighbors1++;
-              } else if (cellcol == 2) {
-                neighbors2++;
-              }
+          if (state[i][k] === xp1) {
+            possibleNeighborsList[4] = undefined;
+            neighbors++;
+            var xx = state[i][k];
+            var yy = state[i][0];
+            var cellcol = this.getCellColor(xx, yy);
+            if (cellcol == 1) {
+              neighbors1++;
+            } else if (cellcol == 2) {
+              neighbors2++;
             }
+          }
 
-            //if (state[i][k] > xstencilmax) {
-            //  break;
-            //}
-          //}
         }
 
         // Bottom
@@ -2306,7 +2277,7 @@
         if (state[ip1] !== undefined) {
           if (state[ip1][0] === yp1) {
 
-            var xm1_;
+            var xm1_, x_, xp1_;
             if (y==GOL.rows-1) {
               xm1_ = kxm1;
               x_ = kx;
@@ -2318,70 +2289,58 @@
             }
 
             for (k = 1; k < state[ip1].length; k++) {
-              //if (state[i+1][k] >= xstencilmin) {
 
-                if (state[ip1][k] === xm1_) {
-                  possibleNeighborsList[5] = undefined;
-                  neighbors++;
-                  var xx = state[ip1][k];
-                  var yy = state[ip1][0];
-                  var cellcol = this.getCellColor(xx, yy);
-                  if (cellcol == 1) {
-                    neighbors1++;
-                  } else if (cellcol == 2) {
-                    neighbors2++;
-                  }
+              if (state[ip1][k] === xm1_) {
+                possibleNeighborsList[5] = undefined;
+                neighbors++;
+                var xx = state[ip1][k];
+                var yy = state[ip1][0];
+                var cellcol = this.getCellColor(xx, yy);
+                if (cellcol == 1) {
+                  neighbors1++;
+                } else if (cellcol == 2) {
+                  neighbors2++;
                 }
+              }
 
-                if (state[ip1][k] === x_) {
-                  possibleNeighborsList[6] = undefined;
-                  neighbors++;
-                  var xx = state[ip1][k];
-                  var yy = state[ip1][0];
-                  var cellcol = this.getCellColor(xx, yy);
-                  if (cellcol == 1) {
-                    neighbors1++;
-                  } else if (cellcol == 2) {
-                    neighbors2++;
-                  }
+              if (state[ip1][k] === x_) {
+                possibleNeighborsList[6] = undefined;
+                neighbors++;
+                var xx = state[ip1][k];
+                var yy = state[ip1][0];
+                var cellcol = this.getCellColor(xx, yy);
+                if (cellcol == 1) {
+                  neighbors1++;
+                } else if (cellcol == 2) {
+                  neighbors2++;
                 }
+              }
 
-                if (state[ip1][k] === xp1_) {
-                  possibleNeighborsList[7] = undefined;
+              if (state[ip1][k] === xp1_) {
+                possibleNeighborsList[7] = undefined;
 
-                  neighbors++;
-                  var xx = state[ip1][k];
-                  var yy = state[ip1][0];
-                  var cellcol = this.getCellColor(xx, yy);
-                  if (cellcol == 1) {
-                    neighbors1++;
-                  } else if (cellcol == 2) {
-                    neighbors2++;
-                  }
+                neighbors++;
+                var xx = state[ip1][k];
+                var yy = state[ip1][0];
+                var cellcol = this.getCellColor(xx, yy);
+                if (cellcol == 1) {
+                  neighbors1++;
+                } else if (cellcol == 2) {
+                  neighbors2++;
                 }
+              }
 
-                //if (state[i+1][k] > xstencilmax) {
-                //  break;
-                //}
-              //}
             }
           }
         }
 
-        // TODO: fix this so we don't use parity
         var color;
         if (neighbors1 > neighbors2) {
           color = 1;
         } else if (neighbors2 > neighbors1) {
           color = 2;
         } else {
-          // return 0 if tie, keep color. fix in callee
-          // color = 0;
-          if (x%2==y%2) {
-            color = 1;
-          } else {
-            color = 2;
-          }
+          color = 0;
         }
 
         //return neighbors;
