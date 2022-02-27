@@ -156,7 +156,7 @@
       livecells : null,
       livecells1 : null,
       livecells2 : null,
-      livepct: null,
+      //livepct: null,
 
       teamColors: [],
       teamNames: [],
@@ -926,7 +926,7 @@
       this.element.livecells.innerHTML  = liveCounts.liveCells;
       this.element.livecells1.innerHTML = liveCounts.liveCells1;
       this.element.livecells2.innerHTML = liveCounts.liveCells2;
-      this.element.livepct.innerHTML    = liveCounts.livePct.toFixed(1) + "%";
+      //this.element.livepct.innerHTML    = liveCounts.livePct.toFixed(1) + "%";
     },
 
     /**
@@ -1036,7 +1036,7 @@
       this.element.team1wlrecCont = document.getElementById("team1record-container");
       this.element.team2wlrecCont = document.getElementById("team2record-container");
 
-      this.element.livepct    = document.getElementById('livePct');
+      //this.element.livepct    = document.getElementById('livePct');
 
       this.element.team1color = document.getElementsByClassName("team1color");
       this.element.team1name  = document.getElementsByClassName("team1name");
