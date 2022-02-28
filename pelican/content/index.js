@@ -818,7 +818,7 @@
           // Scheduled
 
           // Klein Cup has no league, single-column
-          var leagueContainerElem = document.getElementById('scs-league-waiting-container');
+          var leagueContainerElem = document.getElementById('kcs-league-waiting-container');
           for (let g in currGamesApiResult) {
             var game = currGamesApiResult[g];
             if (!game.hasOwnProperty('id')) {
@@ -1115,7 +1115,7 @@
           // In progress
 
           // KCS has no league, single-column
-          var leagueContainerElem = document.getElementById('scs-league-ongoing-container');
+          var leagueContainerElem = document.getElementById('kcs-league-ongoing-container');
           var g;
           for (g = 0; g < currGamesApiResult.length; g++) {
             var game = currGamesApiResult[g];

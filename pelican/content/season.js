@@ -211,8 +211,6 @@
       for (iCol = 0; iCol < nCols; iCol++) {
         if( iCol==0) {
 
-          console.log('first row of day buttons');
-
           // Add a no-button placeholder at day 0 position
           buttonPlaceholderElement = document.createElement('div');
           buttonPlaceholderElement.classList.add('season-number-button');
@@ -228,8 +226,6 @@
 
         // Create a button for this day
         var day = iDay + 1;
-
-        console.log('another row of day buttons '+day);
 
         buttonLiElement = document.createElement('li');
         buttonLiElement.classList.add('page-item');
